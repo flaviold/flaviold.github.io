@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Remove Duplicates</title>
+    <link href="https://fonts.googleapis.com/css?family=Open+Sans&display=swap" rel="stylesheet">
+    <style>
+        body {
+            margin: 0;
+            background: #eee;
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: 'Open Sans', sans-serif;
+        }
+
+        .header {
+            margin-bottom: 30px;
+            color: #3d3d3d;
+            text-align: center;
+        }
+        .header .title {
+            font-size: 2rem;
+        }
+        .header .subtitle {
+            color: #999;
+        }
+        .header .subtitle a {
+            text-decoration: none;
+            color:inherit;
+        }
+        .header .subtitle a:hover {
+            text-decoration: underline;
+            color:inherit;
+        }
+        .input {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+        .input>div {
+            margin: 10px 5px;
+            text-align: center;
+            min-width: 250px;
+            width: 40vw;
+        }
+        textarea {
+            height: 30vw;
+            min-height: 200px;
+            width: 100%;
+            resize: none;
+            display: block;
+        }
+        button {
+            border: none;
+            border-radius: 4px;
+            color: #eee;
+            background: #333;
+            padding: 8px;
+            text-transform: uppercase;
+        }
+    </style>
+</head>
+<body>
+    <div class="wrapper">
+        <div class="header">
+            <span class="title">Remove Duplicates</span>
+            <div class="subtitle">a service by <a href="http://github.com/flaviold">flaviold</a></div>
+        </div>
+        <div class="input">
+            <div>
+                <textarea id="data-in" onchange="inputModified()" onkeydown="inputModified()"></textarea>
+                <div>Lines: <span id="data-in-lines">0</span></div>
+                <button type="button" onclick="removeLines()">Remove lines</button>
+            </div>
+            <div>
+                <textarea id="data-out"></textarea>
+                <div>Lines: <span id="data-out-lines">0</span></div>
+                <button type="button" onclick="copyText()">Copy to clipboard</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let dataIn  = document.getElementById('data-in');
+        let linesDataIn = document.getElementById('data-in-lines');
+        let dataOut = document.getElementById('data-out');
+        let linesDataOut = document.getElementById('data-out-lines');
+
+        function removeLines() {
+            let data = dataIn.value;
+            dataOut.value = data
+                .split('\n')
+                .reduce((acc, cur) => acc.includes(cur.trim()) ? acc : [...acc, cur.trim()], [])
+                .join('\n');
+            linesDataOut.innerText = dataOut.value.split('\n').length;
+        }
+
+        function inputModified() {
+            linesDataIn.innerText = dataIn.value.split('\n').length;
+        }
+
+        function copyText() {
+            dataOut.select();
+            document.execCommand("copy")
+        }
+    </script>
+</body>
+</html>
