@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>VDO Share</title>
   <link rel="stylesheet" href="css/style.css">
+  <script src="../../js/analytics.js"></script>
 </head>
 <body class="view-page">
   <div id="app" v-cloak @pointermove="showControls">
@@ -33,8 +34,8 @@
 
       <nav class="controls" :class="{ hidden: !controlsVisible }" @pointerenter="hoveringControls = true" @pointerleave="hoveringControls = false">
         <div class="control-group">
-          <button type="button" :class="{ active: layout === 'row' }" @click="layout = 'row'" :disabled="isThumbMode">{{ $t('view.sideBySide') }}</button>
-          <button type="button" :class="{ active: layout === 'col' }" @click="layout = 'col'" :disabled="isThumbMode">{{ $t('view.stacked') }}</button>
+          <button type="button" :class="{ active: layout === 'row' }" @click="setLayout('row')" :disabled="isThumbMode">{{ $t('view.sideBySide') }}</button>
+          <button type="button" :class="{ active: layout === 'col' }" @click="setLayout('col')" :disabled="isThumbMode">{{ $t('view.stacked') }}</button>
         </div>
         <div class="control-group">
           <button type="button" :class="{ active: mode === 'split' }" @click="setMode('split')">{{ $t('view.split') }}</button>

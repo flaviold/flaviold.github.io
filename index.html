@@ -4,6 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Tools</title>
+  <script src="js/analytics.js"></script>
   <style>
     :root {
       --bg: #f6f7f9;
@@ -97,7 +98,7 @@
     <!-- Add one <li> per tool under /tools/. -->
     <ul class="tools">
       <li>
-        <a class="tool" href="tools/vdo-share/">
+        <a class="tool" href="tools/vdo-share/" data-umami-event="open-tool" data-umami-event-tool="vdo-share">
           <h2>VDO Share</h2>
           <p data-i18n="vdoShare">Create camera or screen sharing links with VDO.Ninja and show two feeds together on one display page.</p>
         </a>
@@ -144,8 +145,10 @@
 
       document.querySelectorAll("[data-lang]").forEach(function (btn) {
         btn.addEventListener("click", function () {
+          if (btn.getAttribute("aria-pressed") === "true") return;
           try { localStorage.setItem(LANG_KEY, btn.dataset.lang); } catch (e) {}
           apply(btn.dataset.lang);
+          window.siteTrack("language-changed", { lang: btn.dataset.lang });
         });
       });
 

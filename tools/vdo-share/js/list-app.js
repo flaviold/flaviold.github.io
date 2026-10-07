@@ -1,6 +1,7 @@
 (function (ns) {
   const { createApp } = Vue;
   const { t } = ns.i18n;
+  const { track } = ns;
 
   // title/text are i18n keys.
   const TOUR_STEPS = [
@@ -56,9 +57,12 @@
         (id, status) => { this.statuses[id] = status; },
       );
       this.monitor.start();
+      if (this.tourOpen) track("tour-started", { trigger: "auto" });
     },
 
     methods: {
+      track,
+
       pushUrl(share) {
         return ns.vdo.pushUrl(share.streamId, share.label);
       },
@@ -69,6 +73,7 @@
 
       createShare() {
         const share = ns.storage.add(this.newLabel);
+        track("share-created", { labeled: Boolean(this.newLabel) });
         this.shares = ns.storage.load();
         this.lastCreated = share;
         this.newLabel = "";
@@ -79,6 +84,7 @@
         const name = share.label || share.streamId;
         if (!window.confirm(t("shares.removeConfirm", { name }))) return;
         ns.storage.remove(share.streamId);
+        track("share-removed");
         this.shares = ns.storage.load();
         this.selected = this.selected.filter((id) => id !== share.streamId);
         delete this.statuses[share.streamId];
@@ -105,6 +111,8 @@
           window.prompt(t("action.copyPrompt"), text);
           return;
         }
+        if (key === "display") track("display-link-copied");
+        else track("share-link-copied", { from: key === "last" ? "new" : "list" });
         this.copiedKey = key;
         clearTimeout(this.copiedTimer);
         this.copiedTimer = setTimeout(() => { this.copiedKey = null; }, 1500);
@@ -113,13 +121,16 @@
       startTour() {
         this.labelBeforeTour = this.newLabel;
         this.tourOpen = true;
+        track("tour-started", { trigger: "button" });
       },
 
       playTourDemo(step) {
         ns.tourDemo.play(this, step);
       },
 
-      closeTour() {
+      // result: { completed, step } from the tour component.
+      closeTour(result) {
+        track(result.completed ? "tour-completed" : "tour-skipped", { step: result.step + 1 });
         ns.tourDemo.stop();
         this.tourOpen = false;
         this.demo = null;

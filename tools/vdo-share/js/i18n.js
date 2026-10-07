@@ -175,8 +175,9 @@
   }
 
   function setLang(lang) {
-    if (!(lang in messages)) return;
+    if (!(lang in messages) || lang === state.lang) return;
     state.lang = lang;
+    if (ns.track) ns.track("language-changed", { lang });
     try {
       localStorage.setItem(LANG_KEY, lang);
     } catch (e) {

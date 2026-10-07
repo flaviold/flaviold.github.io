@@ -31,9 +31,9 @@
           <h3 id="tour-title">{{ $t(step.title) }}</h3>
           <p>{{ $t(step.text) }}</p>
           <div class="tour-actions">
-            <button type="button" class="link" @click="close">{{ $t("tour.skip") }}</button>
+            <button type="button" class="link" @click="close(false)">{{ $t("tour.skip") }}</button>
             <button v-if="index > 0" type="button" @click="go(index - 1)">{{ $t("tour.back") }}</button>
-            <button ref="next" type="button" class="primary" @click="isLast ? close() : go(index + 1)">{{ isLast ? $t("tour.done") : $t("tour.next") }}</button>
+            <button ref="next" type="button" class="primary" @click="isLast ? close(true) : go(index + 1)">{{ isLast ? $t("tour.done") : $t("tour.next") }}</button>
           </div>
         </div>
       </div>`,
@@ -107,13 +107,13 @@
       },
 
       onKey(event) {
-        if (event.key === "Escape") this.close();
+        if (event.key === "Escape") this.close(false);
         else if (event.key === "ArrowRight" && !this.isLast) this.go(this.index + 1);
         else if (event.key === "ArrowLeft" && this.index > 0) this.go(this.index - 1);
       },
 
-      close() {
-        this.$emit("close");
+      close(completed) {
+        this.$emit("close", { completed, step: this.index });
       },
     },
   };

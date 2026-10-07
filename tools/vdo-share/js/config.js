@@ -10,3 +10,8 @@ VDOShare.config = {
   // How long a single probe waits for the publisher before reporting "inactive".
   PROBE_WINDOW_MS: 10000,
 };
+
+// Custom analytics event (no-op when /js/analytics.js is missing). Never pass share IDs.
+VDOShare.track = function (name, data) {
+  if (window.siteTrack) window.siteTrack(name, data);
+};

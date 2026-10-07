@@ -9,6 +9,7 @@
   const CONTROLS_IDLE_MS = 2500;
 
   const clamp = (value, min, max) => Math.min(Math.max(value, min), max);
+  const { track } = ns;
 
   function readParams() {
     const params = new URLSearchParams(window.location.search);
@@ -44,6 +45,7 @@
     },
 
     mounted() {
+      if (this.error) track("display-error", { reason: this.error === "view.errorMissing" ? "missing" : "invalid" });
       this.showControls();
       window.addEventListener("resize", this.clampThumb);
       document.addEventListener("fullscreenchange", () => {
@@ -69,12 +71,21 @@
         return {};
       },
 
+      setLayout(layout) {
+        if (layout === this.layout) return;
+        this.layout = layout;
+        track("display-layout", { layout: layout === "row" ? "side-by-side" : "stacked" });
+      },
+
       setMode(mode) {
+        if (mode === this.mode) return;
         this.mode = mode;
+        track("display-mode", { mode });
         if (mode !== "split" && !this.thumb) this.resetThumb();
       },
 
       swap() {
+        track("display-swap");
         if (this.mode === "thumb-a") this.mode = "thumb-b";
         else if (this.mode === "thumb-b") this.mode = "thumb-a";
         else this.swapped = !this.swapped;
@@ -129,6 +140,7 @@
         };
         const onUp = () => {
           this.dragging = null;
+          track("display-resize", { kind });
           window.removeEventListener("pointermove", onMove);
           window.removeEventListener("pointerup", onUp);
           window.removeEventListener("pointercancel", onUp);
@@ -148,7 +160,10 @@
 
       toggleFullscreen() {
         if (document.fullscreenElement) document.exitFullscreen();
-        else document.documentElement.requestFullscreen().catch(() => {});
+        else {
+          document.documentElement.requestFullscreen().catch(() => {});
+          track("display-fullscreen");
+        }
       },
     },
   })

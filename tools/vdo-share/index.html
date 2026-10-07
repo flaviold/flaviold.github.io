@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>VDO Share</title>
   <link rel="stylesheet" href="css/style.css">
+  <script src="../../js/analytics.js"></script>
 </head>
 <body class="list-page">
   <div id="app" class="container" v-cloak>
@@ -80,7 +81,7 @@
             <td>
               <div class="actions">
                 <button type="button" :data-demo="'copy-' + share.streamId" @click="copy(pushUrl(share), share.streamId)">{{ copiedKey === share.streamId ? $t('action.copied') : $t('action.copyLink') }}</button>
-                <a class="button" :href="previewUrl(share)" target="_blank" rel="noopener">{{ $t('action.preview') }}</a>
+                <a class="button" :href="previewUrl(share)" target="_blank" rel="noopener" @click="track('share-preview')">{{ $t('action.preview') }}</a>
                 <button type="button" class="danger" @click="removeShare(share)">{{ $t('action.remove') }}</button>
               </div>
             </td>
@@ -96,7 +97,7 @@
         <div class="row">
           <input :value="displayUrl" readonly @focus="$event.target.select()" :aria-label="$t('display.linkAria')">
           <button type="button" data-demo="copy-display" @click="copy(displayUrl, 'display')">{{ copiedKey === 'display' ? $t('action.copied') : $t('action.copy') }}</button>
-          <a class="button primary" data-demo="open-display" :href="displayUrl" target="_blank" rel="noopener">{{ $t('action.open') }}</a>
+          <a class="button primary" data-demo="open-display" :href="displayUrl" target="_blank" rel="noopener" @click="track('display-opened')">{{ $t('action.open') }}</a>
         </div>
       </div>
     </section>
