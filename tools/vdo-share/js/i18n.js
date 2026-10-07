@@ -78,6 +78,8 @@
       "view.swap": "Swap",
       "view.fullscreen": "Fullscreen",
       "view.exitFullscreen": "Exit fullscreen",
+
+      "footer.github": "flaviold on GitHub",
     },
 
     pt: {
@@ -153,6 +155,8 @@
       "view.swap": "Inverter",
       "view.fullscreen": "Tela cheia",
       "view.exitFullscreen": "Sair da tela cheia",
+
+      "footer.github": "flaviold no GitHub",
     },
   };
 
