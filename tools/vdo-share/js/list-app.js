@@ -1,6 +1,37 @@
 (function (ns) {
   const { createApp } = Vue;
 
+  const TOUR_STEPS = [
+    {
+      target: '[data-tour="create"]',
+      title: "Create a share link",
+      text: "Give it an optional label and click Generate link. Send the link to the person who will share. They choose camera or screen inside VDO.Ninja.",
+    },
+    {
+      target: '[data-tour="shares"]',
+      title: "Track your shares",
+      text: "Every link you create is saved in this browser. Status turns Active while someone is sharing on that link. Use Copy link, Preview or Remove on each one.",
+    },
+    {
+      target: ['table.shares', '[data-tour="shares"]'],
+      title: "Pick two feeds",
+      text: "Tick the Display box on two shares. The first one you tick is feed A, the second is feed B.",
+    },
+    {
+      target: '[data-tour="display"]',
+      title: "Open the display page",
+      text: "Copy or open the display link. There you can show the feeds side by side or stacked, drag the divider, or turn either feed into a movable thumbnail.",
+    },
+  ];
+
+  function isTourDone() {
+    try {
+      return localStorage.getItem(ns.config.TOUR_DONE_KEY) === "1";
+    } catch (e) {
+      return false;
+    }
+  }
+
   createApp({
     data() {
       return {
@@ -11,6 +42,8 @@
         selected: [], // ordered stream IDs: [A, B]
         copiedKey: null,
         pollSeconds: Math.round(ns.config.POLL_INTERVAL_MS / 1000),
+        tourSteps: TOUR_STEPS,
+        tourOpen: !isTourDone(),
       };
     },
 
@@ -82,6 +115,19 @@
         this.copiedTimer = setTimeout(() => { this.copiedKey = null; }, 1500);
       },
 
+      startTour() {
+        this.tourOpen = true;
+      },
+
+      closeTour() {
+        this.tourOpen = false;
+        try {
+          localStorage.setItem(ns.config.TOUR_DONE_KEY, "1");
+        } catch (e) {
+          // Without storage the tour simply shows again next visit.
+        }
+      },
+
       statusText(status) {
         if (status === "active") return "Active";
         if (status === "inactive") return "Inactive";
@@ -92,5 +138,7 @@
         return new Date(timestamp).toLocaleString();
       },
     },
-  }).mount("#app");
+  })
+    .component("tour-overlay", ns.TourOverlay)
+    .mount("#app");
 })(window.VDOShare);

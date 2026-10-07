@@ -254,3 +254,31 @@ input[type="text"], input:not([type]) {
   color: #e8eaed;
   text-align: center;
 }
+
+/* ---------- Guided tour ---------- */
+
+.page-header .section-title { align-items: center; }
+
+.tour { position: fixed; inset: 0; z-index: 100; }
+.tour-backdrop { position: absolute; inset: 0; background: rgba(0, 0, 0, 0.6); }
+.tour-spot {
+  position: fixed;
+  border-radius: var(--radius);
+  box-shadow: 0 0 0 9999px rgba(0, 0, 0, 0.6);
+  outline: 2px solid var(--accent);
+  pointer-events: none;
+  transition: left 0.2s, top 0.2s, width 0.2s, height 0.2s;
+}
+.tour-tip {
+  position: fixed;
+  width: min(360px, calc(100vw - 32px));
+  padding: 16px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.35);
+}
+.tour-tip h3 { margin: 4px 0 6px; font-size: 16px; }
+.tour-tip p { margin: 0 0 14px; font-size: 14px; line-height: 1.45; }
+.tour-actions { display: flex; gap: 6px; justify-content: flex-end; }
+.tour-actions .link { margin-right: auto; border-color: transparent; background: none; color: var(--muted); }

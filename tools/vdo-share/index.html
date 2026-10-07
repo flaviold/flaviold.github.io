@@ -9,11 +9,14 @@
 <body class="list-page">
   <div id="app" class="container" v-cloak>
     <header class="page-header">
-      <h1>VDO Share</h1>
+      <div class="section-title">
+        <h1>VDO Share</h1>
+        <button type="button" @click="startTour">How it works</button>
+      </div>
       <p class="muted">Create links for people to share their camera or screen, then combine two of them into a display page.</p>
     </header>
 
-    <section class="card">
+    <section class="card" data-tour="create">
       <h2>New share link</h2>
       <form class="row" @submit.prevent="createShare">
         <input v-model.trim="newLabel" type="text" maxlength="60" placeholder="Label (optional)" aria-label="Label">
@@ -28,7 +31,7 @@
       </div>
     </section>
 
-    <section class="card">
+    <section class="card" data-tour="shares">
       <div class="section-title">
         <h2>Shares</h2>
         <span class="muted small">Status refreshes every {{ pollSeconds }}s</span>
@@ -81,7 +84,7 @@
       </table>
     </section>
 
-    <section class="card">
+    <section class="card" data-tour="display">
       <h2>Display page</h2>
       <p class="muted" v-if="selected.length < 2">Select two shares in the list ({{ selected.length }}/2 selected). The first one selected is feed A.</p>
       <div v-else class="link-box">
@@ -92,6 +95,8 @@
         </div>
       </div>
     </section>
+
+    <tour-overlay v-if="tourOpen" :steps="tourSteps" @close="closeTour"></tour-overlay>
   </div>
 
   <script src="https://cdnjs.cloudflare.com/ajax/libs/vue/3.5.13/vue.global.prod.min.js"></script>
@@ -99,6 +104,7 @@
   <script src="js/vdo.js"></script>
   <script src="js/storage.js"></script>
   <script src="js/status.js"></script>
+  <script src="js/tour.js"></script>
   <script src="js/list-app.js"></script>
 </body>
 </html>
