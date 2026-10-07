@@ -66,22 +66,91 @@
     .tool:hover, .tool:focus-visible { border-color: var(--accent); }
     .tool h2 { margin: 0 0 6px; font-size: 18px; color: var(--accent); }
     .tool p { margin: 0; color: var(--muted); font-size: 14px; }
+
+    .header { display: flex; justify-content: space-between; align-items: center; gap: 8px; }
+    .lang-switch { display: inline-flex; }
+    .lang-switch button {
+      padding: 6px 10px;
+      border: 1px solid var(--border);
+      background: var(--surface);
+      color: var(--text);
+      font: inherit;
+      font-size: 13px;
+      cursor: pointer;
+    }
+    .lang-switch button:first-child { border-radius: var(--radius) 0 0 var(--radius); }
+    .lang-switch button:last-child { border-radius: 0 var(--radius) var(--radius) 0; margin-left: -1px; }
+    .lang-switch button[aria-pressed="true"] { background: var(--accent); border-color: var(--accent); color: #fff; }
   </style>
 </head>
 <body>
   <main class="container">
-    <h1>Tools</h1>
-    <p class="muted">Small browser-based tools. Everything runs in your browser.</p>
+    <div class="header">
+      <h1 data-i18n="title">Tools</h1>
+      <div class="lang-switch" role="group" aria-label="Language">
+        <button type="button" data-lang="en">EN</button>
+        <button type="button" data-lang="pt">PT</button>
+      </div>
+    </div>
+    <p class="muted" data-i18n="intro">Small browser-based tools. Everything runs in your browser.</p>
 
     <!-- Add one <li> per tool under /tools/. -->
     <ul class="tools">
       <li>
         <a class="tool" href="tools/vdo-share/">
           <h2>VDO Share</h2>
-          <p>Create camera or screen sharing links with VDO.Ninja and show two feeds together on one display page.</p>
+          <p data-i18n="vdoShare">Create camera or screen sharing links with VDO.Ninja and show two feeds together on one display page.</p>
         </a>
       </li>
     </ul>
   </main>
+
+  <script>
+    // Same preference key as the tools (tools/vdo-share/js/i18n.js).
+    (function () {
+      var LANG_KEY = "siteLang";
+      var messages = {
+        en: {
+          title: "Tools",
+          intro: "Small browser-based tools. Everything runs in your browser.",
+          vdoShare: "Create camera or screen sharing links with VDO.Ninja and show two feeds together on one display page.",
+        },
+        pt: {
+          title: "Ferramentas",
+          intro: "Pequenas ferramentas que rodam inteiramente no seu navegador.",
+          vdoShare: "Crie links de compartilhamento de câmera ou tela com o VDO.Ninja e mostre dois feeds juntos em uma página de exibição.",
+        },
+      };
+
+      function detectLang() {
+        try {
+          var stored = localStorage.getItem(LANG_KEY);
+          if (stored in messages) return stored;
+        } catch (e) {}
+        var preferred = navigator.languages || [navigator.language || ""];
+        return preferred.some(function (l) { return l.toLowerCase().indexOf("pt") === 0; }) ? "pt" : "en";
+      }
+
+      function apply(lang) {
+        document.documentElement.lang = lang === "pt" ? "pt-BR" : "en-US";
+        document.title = messages[lang].title;
+        document.querySelectorAll("[data-i18n]").forEach(function (el) {
+          el.textContent = messages[lang][el.dataset.i18n];
+        });
+        document.querySelectorAll("[data-lang]").forEach(function (btn) {
+          btn.setAttribute("aria-pressed", String(btn.dataset.lang === lang));
+        });
+      }
+
+      document.querySelectorAll("[data-lang]").forEach(function (btn) {
+        btn.addEventListener("click", function () {
+          try { localStorage.setItem(LANG_KEY, btn.dataset.lang); } catch (e) {}
+          apply(btn.dataset.lang);
+        });
+      });
+
+      apply(detectLang());
+    })();
+  </script>
 </body>
 </html>

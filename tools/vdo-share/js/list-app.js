@@ -1,27 +1,13 @@
 (function (ns) {
   const { createApp } = Vue;
+  const { t } = ns.i18n;
 
+  // title/text are i18n keys.
   const TOUR_STEPS = [
-    {
-      target: '[data-tour="create"]',
-      title: "Create a share link",
-      text: "Give it an optional label and click Generate link. Send the link to the person who will share. They choose camera or screen inside VDO.Ninja.",
-    },
-    {
-      target: '[data-tour="shares"]',
-      title: "Track your shares",
-      text: "Every link you create is saved in this browser. Status turns Active while someone is sharing on that link. Use Copy link, Preview or Remove on each one.",
-    },
-    {
-      target: ['table.shares', '[data-tour="shares"]'],
-      title: "Pick two feeds",
-      text: "Tick the Display box on two shares. The first one you tick is feed A, the second is feed B.",
-    },
-    {
-      target: '[data-tour="display"]',
-      title: "Open the display page",
-      text: "Copy or open the display link. There you can show the feeds side by side or stacked, drag the divider, or turn either feed into a movable thumbnail.",
-    },
+    { target: '[data-tour="create"]', title: "tour.create.title", text: "tour.create.text" },
+    { target: '[data-tour="shares"]', title: "tour.shares.title", text: "tour.shares.text" },
+    { target: ["table.shares", '[data-tour="shares"]'], title: "tour.select.title", text: "tour.select.text" },
+    { target: '[data-tour="display"]', title: "tour.display.title", text: "tour.display.text" },
   ];
 
   function isTourDone() {
@@ -82,7 +68,7 @@
 
       removeShare(share) {
         const name = share.label || share.streamId;
-        if (!window.confirm(`Remove "${name}"? Its links will stop being listed here.`)) return;
+        if (!window.confirm(t("shares.removeConfirm", { name }))) return;
         ns.storage.remove(share.streamId);
         this.shares = ns.storage.load();
         this.selected = this.selected.filter((id) => id !== share.streamId);
@@ -107,7 +93,7 @@
         try {
           await navigator.clipboard.writeText(text);
         } catch (e) {
-          window.prompt("Copy this link:", text);
+          window.prompt(t("action.copyPrompt"), text);
           return;
         }
         this.copiedKey = key;
@@ -128,17 +114,12 @@
         }
       },
 
-      statusText(status) {
-        if (status === "active") return "Active";
-        if (status === "inactive") return "Inactive";
-        return "Checking…";
-      },
-
       formatDate(timestamp) {
-        return new Date(timestamp).toLocaleString();
+        return new Date(timestamp).toLocaleString(ns.i18n.locale());
       },
     },
   })
+    .use(ns.i18n.plugin("list.title"))
     .component("tour-overlay", ns.TourOverlay)
     .mount("#app");
 })(window.VDOShare);

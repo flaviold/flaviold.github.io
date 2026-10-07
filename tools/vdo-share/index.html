@@ -10,43 +10,46 @@
   <div id="app" class="container" v-cloak>
     <header class="page-header">
       <div class="section-title">
-        <h1>VDO Share</h1>
-        <button type="button" @click="startTour">How it works</button>
+        <h1>{{ $t('list.title') }}</h1>
+        <div class="row">
+          <lang-switch></lang-switch>
+          <button type="button" @click="startTour">{{ $t('list.howItWorks') }}</button>
+        </div>
       </div>
-      <p class="muted">Create links for people to share their camera or screen, then combine two of them into a display page.</p>
+      <p class="muted">{{ $t('list.intro') }}</p>
     </header>
 
     <section class="card" data-tour="create">
-      <h2>New share link</h2>
+      <h2>{{ $t('create.title') }}</h2>
       <form class="row" @submit.prevent="createShare">
-        <input v-model.trim="newLabel" type="text" maxlength="60" placeholder="Label (optional)" aria-label="Label">
-        <button type="submit" class="primary">Generate link</button>
+        <input v-model.trim="newLabel" type="text" maxlength="60" :placeholder="$t('create.labelPlaceholder')" :aria-label="$t('create.labelAria')">
+        <button type="submit" class="primary">{{ $t('create.submit') }}</button>
       </form>
       <div v-if="lastCreated" class="link-box">
-        <span class="muted">Send this link to the person who will share:</span>
+        <span class="muted">{{ $t('create.sendHint') }}</span>
         <div class="row">
-          <input :value="pushUrl(lastCreated)" readonly @focus="$event.target.select()" aria-label="Share link">
-          <button type="button" @click="copy(pushUrl(lastCreated), 'last')">{{ copiedKey === 'last' ? 'Copied!' : 'Copy' }}</button>
+          <input :value="pushUrl(lastCreated)" readonly @focus="$event.target.select()" :aria-label="$t('create.linkAria')">
+          <button type="button" @click="copy(pushUrl(lastCreated), 'last')">{{ copiedKey === 'last' ? $t('action.copied') : $t('action.copy') }}</button>
         </div>
       </div>
     </section>
 
     <section class="card" data-tour="shares">
       <div class="section-title">
-        <h2>Shares</h2>
-        <span class="muted small">Status refreshes every {{ pollSeconds }}s</span>
+        <h2>{{ $t('shares.title') }}</h2>
+        <span class="muted small">{{ $t('shares.refresh', { s: pollSeconds }) }}</span>
       </div>
 
-      <p v-if="!shares.length" class="muted">No shares yet. Generate a link above.</p>
+      <p v-if="!shares.length" class="muted">{{ $t('shares.empty') }}</p>
 
       <table v-else class="shares">
         <thead>
           <tr>
-            <th title="Select two shares for the display page">Display</th>
-            <th>Status</th>
-            <th>Label</th>
-            <th>ID</th>
-            <th>Created</th>
+            <th :title="$t('shares.colDisplayHint')">{{ $t('shares.colDisplay') }}</th>
+            <th>{{ $t('shares.colStatus') }}</th>
+            <th>{{ $t('shares.colLabel') }}</th>
+            <th>{{ $t('shares.colId') }}</th>
+            <th>{{ $t('shares.colCreated') }}</th>
             <th></th>
           </tr>
         </thead>
@@ -57,26 +60,27 @@
                 <input type="checkbox"
                        :checked="selected.includes(share.streamId)"
                        :disabled="selected.length >= 2 && !selected.includes(share.streamId)"
+                       :aria-label="$t('shares.colDisplay')"
                        @change="toggleSelect(share.streamId)">
                 <span v-if="selected.includes(share.streamId)" class="badge">{{ selected.indexOf(share.streamId) === 0 ? 'A' : 'B' }}</span>
               </label>
             </td>
             <td>
               <span class="status" :class="'status-' + (statuses[share.streamId] || 'checking')">
-                {{ statusText(statuses[share.streamId]) }}
+                {{ $t('status.' + (statuses[share.streamId] || 'checking')) }}
               </span>
             </td>
             <td>
               <input class="label-input" type="text" maxlength="60" placeholder="—"
-                     :value="share.label" @change="updateLabel(share, $event.target.value)" aria-label="Label">
+                     :value="share.label" @change="updateLabel(share, $event.target.value)" :aria-label="$t('create.labelAria')">
             </td>
             <td><code>{{ share.streamId }}</code></td>
             <td class="muted small">{{ formatDate(share.createdAt) }}</td>
             <td>
               <div class="actions">
-                <button type="button" @click="copy(pushUrl(share), share.streamId)">{{ copiedKey === share.streamId ? 'Copied!' : 'Copy link' }}</button>
-                <a class="button" :href="previewUrl(share)" target="_blank" rel="noopener">Preview</a>
-                <button type="button" class="danger" @click="removeShare(share)">Remove</button>
+                <button type="button" @click="copy(pushUrl(share), share.streamId)">{{ copiedKey === share.streamId ? $t('action.copied') : $t('action.copyLink') }}</button>
+                <a class="button" :href="previewUrl(share)" target="_blank" rel="noopener">{{ $t('action.preview') }}</a>
+                <button type="button" class="danger" @click="removeShare(share)">{{ $t('action.remove') }}</button>
               </div>
             </td>
           </tr>
@@ -85,13 +89,13 @@
     </section>
 
     <section class="card" data-tour="display">
-      <h2>Display page</h2>
-      <p class="muted" v-if="selected.length < 2">Select two shares in the list ({{ selected.length }}/2 selected). The first one selected is feed A.</p>
+      <h2>{{ $t('display.title') }}</h2>
+      <p class="muted" v-if="selected.length < 2">{{ $t('display.hint', { n: selected.length }) }}</p>
       <div v-else class="link-box">
         <div class="row">
-          <input :value="displayUrl" readonly @focus="$event.target.select()" aria-label="Display link">
-          <button type="button" @click="copy(displayUrl, 'display')">{{ copiedKey === 'display' ? 'Copied!' : 'Copy' }}</button>
-          <a class="button primary" :href="displayUrl" target="_blank" rel="noopener">Open</a>
+          <input :value="displayUrl" readonly @focus="$event.target.select()" :aria-label="$t('display.linkAria')">
+          <button type="button" @click="copy(displayUrl, 'display')">{{ copiedKey === 'display' ? $t('action.copied') : $t('action.copy') }}</button>
+          <a class="button primary" :href="displayUrl" target="_blank" rel="noopener">{{ $t('action.open') }}</a>
         </div>
       </div>
     </section>
@@ -101,6 +105,7 @@
 
   <script src="https://cdnjs.cloudflare.com/ajax/libs/vue/3.5.13/vue.global.prod.min.js"></script>
   <script src="js/config.js"></script>
+  <script src="js/i18n.js"></script>
   <script src="js/vdo.js"></script>
   <script src="js/storage.js"></script>
   <script src="js/status.js"></script>

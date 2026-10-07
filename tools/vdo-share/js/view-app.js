@@ -14,8 +14,8 @@
     const params = new URLSearchParams(window.location.search);
     const a = params.get("a");
     const b = params.get("b");
-    if (!a || !b) return { error: "The link must contain two share IDs (?a=...&b=...)." };
-    if (!ns.vdo.isValidStreamId(a) || !ns.vdo.isValidStreamId(b)) return { error: "One of the share IDs in the link is invalid." };
+    if (!a || !b) return { error: "view.errorMissing" };
+    if (!ns.vdo.isValidStreamId(a) || !ns.vdo.isValidStreamId(b)) return { error: "view.errorInvalid" };
     return { a, b };
   }
 
@@ -23,7 +23,7 @@
     data() {
       const params = readParams();
       return {
-        error: params.error || null,
+        error: params.error || null, // i18n key
         urls: params.error ? {} : { a: ns.vdo.viewUrl(params.a), b: ns.vdo.viewUrl(params.b) },
         layout: "row", // "row" (side by side) | "col" (stacked)
         mode: "split", // "split" | "thumb-a" | "thumb-b"
@@ -151,5 +151,7 @@
         else document.documentElement.requestFullscreen().catch(() => {});
       },
     },
-  }).mount("#app");
+  })
+    .use(ns.i18n.plugin("view.title"))
+    .mount("#app");
 })(window.VDOShare);

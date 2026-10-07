@@ -1,5 +1,5 @@
 // Guided tour: highlights one element per step and shows a tooltip next to it.
-// steps: [{ target: selector | [selectors, first visible wins], title, text }]
+// steps: [{ target: selector | [selectors, first visible wins], title, text }]; title/text are i18n keys.
 (function (ns) {
   const GUTTER = 16; // min distance from the viewport edge
   const GAP = 12; // space between highlight and tooltip
@@ -27,13 +27,13 @@
         <div v-if="spot" class="tour-spot" :style="spot"></div>
         <div v-else class="tour-backdrop"></div>
         <div ref="tip" class="tour-tip" :style="tipStyle">
-          <span class="muted small">Step {{ index + 1 }} of {{ steps.length }}</span>
-          <h3 id="tour-title">{{ step.title }}</h3>
-          <p>{{ step.text }}</p>
+          <span class="muted small">{{ $t("tour.step", { n: index + 1, total: steps.length }) }}</span>
+          <h3 id="tour-title">{{ $t(step.title) }}</h3>
+          <p>{{ $t(step.text) }}</p>
           <div class="tour-actions">
-            <button type="button" class="link" @click="close">Skip</button>
-            <button v-if="index > 0" type="button" @click="go(index - 1)">Back</button>
-            <button ref="next" type="button" class="primary" @click="isLast ? close() : go(index + 1)">{{ isLast ? "Done" : "Next" }}</button>
+            <button type="button" class="link" @click="close">{{ $t("tour.skip") }}</button>
+            <button v-if="index > 0" type="button" @click="go(index - 1)">{{ $t("tour.back") }}</button>
+            <button ref="next" type="button" class="primary" @click="isLast ? close() : go(index + 1)">{{ isLast ? $t("tour.done") : $t("tour.next") }}</button>
           </div>
         </div>
       </div>`,

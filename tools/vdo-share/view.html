@@ -3,27 +3,28 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>VDO Share Display</title>
+  <title>VDO Share</title>
   <link rel="stylesheet" href="css/style.css">
 </head>
 <body class="view-page">
   <div id="app" v-cloak @pointermove="showControls">
     <div v-if="error" class="view-error">
-      <h1>Cannot open display</h1>
-      <p>{{ error }}</p>
-      <a class="button" href="./">Back to shares</a>
+      <h1>{{ $t('view.errorTitle') }}</h1>
+      <p>{{ $t(error) }}</p>
+      <lang-switch></lang-switch>
+      <a class="button" href="./">{{ $t('view.back') }}</a>
     </div>
 
     <template v-else>
       <!-- The iframes are created once; layout changes only touch classes/styles so streams never reconnect. -->
       <div ref="stage" class="stage" :class="['layout-' + layout, isThumbMode ? 'mode-thumb' : 'mode-split']">
         <div v-for="feed in ['a', 'b']" :key="feed" class="feed" :class="'role-' + feedRole(feed)" :style="feedStyle(feed)">
-          <iframe :src="urls[feed]" allow="autoplay; fullscreen" :title="'Feed ' + feed.toUpperCase()"></iframe>
-          <div class="feed-grab" title="Drag to move" @pointerdown="startDrag($event, 'move')"></div>
-          <div class="feed-resize" title="Drag to resize" @pointerdown="startDrag($event, 'resize')"></div>
+          <iframe :src="urls[feed]" allow="autoplay; fullscreen" :title="$t('view.feed', { name: feed.toUpperCase() })"></iframe>
+          <div class="feed-grab" :title="$t('view.dragMove')" @pointerdown="startDrag($event, 'move')"></div>
+          <div class="feed-resize" :title="$t('view.dragResize')" @pointerdown="startDrag($event, 'resize')"></div>
           <span class="feed-tag">{{ feed.toUpperCase() }}</span>
         </div>
-        <div class="divider" title="Drag to resize" @pointerdown="startDrag($event, 'split')"></div>
+        <div class="divider" :title="$t('view.dragResize')" @pointerdown="startDrag($event, 'split')"></div>
       </div>
 
       <div class="drag-shield" :class="{ active: dragging }" :data-kind="dragging"></div>
@@ -32,24 +33,26 @@
 
       <nav class="controls" :class="{ hidden: !controlsVisible }" @pointerenter="hoveringControls = true" @pointerleave="hoveringControls = false">
         <div class="control-group">
-          <button type="button" :class="{ active: layout === 'row' }" @click="layout = 'row'" :disabled="isThumbMode">Side by side</button>
-          <button type="button" :class="{ active: layout === 'col' }" @click="layout = 'col'" :disabled="isThumbMode">Stacked</button>
+          <button type="button" :class="{ active: layout === 'row' }" @click="layout = 'row'" :disabled="isThumbMode">{{ $t('view.sideBySide') }}</button>
+          <button type="button" :class="{ active: layout === 'col' }" @click="layout = 'col'" :disabled="isThumbMode">{{ $t('view.stacked') }}</button>
         </div>
         <div class="control-group">
-          <button type="button" :class="{ active: mode === 'split' }" @click="setMode('split')">Split</button>
-          <button type="button" :class="{ active: mode === 'thumb-a' }" @click="setMode('thumb-a')">Thumbnail A</button>
-          <button type="button" :class="{ active: mode === 'thumb-b' }" @click="setMode('thumb-b')">Thumbnail B</button>
+          <button type="button" :class="{ active: mode === 'split' }" @click="setMode('split')">{{ $t('view.split') }}</button>
+          <button type="button" :class="{ active: mode === 'thumb-a' }" @click="setMode('thumb-a')">{{ $t('view.thumbA') }}</button>
+          <button type="button" :class="{ active: mode === 'thumb-b' }" @click="setMode('thumb-b')">{{ $t('view.thumbB') }}</button>
         </div>
         <div class="control-group">
-          <button type="button" @click="swap">Swap</button>
-          <button type="button" @click="toggleFullscreen">{{ isFullscreen ? 'Exit fullscreen' : 'Fullscreen' }}</button>
+          <button type="button" @click="swap">{{ $t('view.swap') }}</button>
+          <button type="button" @click="toggleFullscreen">{{ isFullscreen ? $t('view.exitFullscreen') : $t('view.fullscreen') }}</button>
         </div>
+        <lang-switch></lang-switch>
       </nav>
     </template>
   </div>
 
   <script src="https://cdnjs.cloudflare.com/ajax/libs/vue/3.5.13/vue.global.prod.min.js"></script>
   <script src="js/config.js"></script>
+  <script src="js/i18n.js"></script>
   <script src="js/vdo.js"></script>
   <script src="js/view-app.js"></script>
 </body>

@@ -282,3 +282,12 @@ input[type="text"], input:not([type]) {
 .tour-tip p { margin: 0 0 14px; font-size: 14px; line-height: 1.45; }
 .tour-actions { display: flex; gap: 6px; justify-content: flex-end; }
 .tour-actions .link { margin-right: auto; border-color: transparent; background: none; color: var(--muted); }
+
+/* ---------- Language switch ---------- */
+
+.lang-switch { display: inline-flex; }
+.lang-switch button { padding: 7px 10px; font-size: 13px; }
+.lang-switch button:first-child { border-radius: var(--radius) 0 0 var(--radius); }
+.lang-switch button:last-child { border-radius: 0 var(--radius) var(--radius) 0; margin-left: -1px; }
+.lang-switch button.active { background: var(--accent); border-color: var(--accent); color: var(--accent-text); }
+.view-error .lang-switch { margin-right: 8px; }
