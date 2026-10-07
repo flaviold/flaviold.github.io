@@ -1,0 +1,256 @@
+:root {
+  --bg: #f6f7f9;
+  --surface: #ffffff;
+  --text: #1c1f24;
+  --muted: #6a7280;
+  --border: #dde1e7;
+  --accent: #2563eb;
+  --accent-text: #ffffff;
+  --danger: #c62828;
+  --active: #16a34a;
+  --inactive: #9aa1ad;
+  --radius: 8px;
+  font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #121418;
+    --surface: #1b1e24;
+    --text: #e8eaed;
+    --muted: #9aa1ad;
+    --border: #2e333b;
+    --accent: #3b82f6;
+    --danger: #ef5350;
+    --inactive: #6a7280;
+  }
+}
+
+* { box-sizing: border-box; }
+[v-cloak] { display: none; }
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+}
+
+button, .button, input {
+  font: inherit;
+  font-size: 14px;
+}
+
+button, .button {
+  display: inline-flex;
+  align-items: center;
+  padding: 7px 12px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface);
+  color: var(--text);
+  text-decoration: none;
+  cursor: pointer;
+  white-space: nowrap;
+}
+button:hover, .button:hover { border-color: var(--accent); }
+button:disabled { opacity: 0.45; cursor: not-allowed; }
+button.primary, .button.primary { background: var(--accent); border-color: var(--accent); color: var(--accent-text); }
+button.danger { color: var(--danger); }
+
+input[type="text"], input:not([type]) {
+  flex: 1;
+  min-width: 0;
+  padding: 7px 10px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--bg);
+  color: var(--text);
+}
+
+.muted { color: var(--muted); }
+.small { font-size: 12px; }
+.row { display: flex; gap: 8px; align-items: center; }
+
+/* ---------- Page 1: list ---------- */
+
+.container {
+  max-width: 1000px;
+  margin: 0 auto;
+  padding: 24px 16px 48px;
+}
+
+.page-header h1 { margin: 0 0 4px; }
+.page-header p { margin: 0 0 20px; }
+
+.card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 16px;
+  margin-bottom: 16px;
+}
+.card h2 { margin: 0 0 12px; font-size: 18px; }
+
+.section-title { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; }
+
+.link-box { display: flex; flex-direction: column; gap: 6px; margin-top: 12px; }
+
+.shares { width: 100%; border-collapse: collapse; }
+.shares th, .shares td { padding: 8px 6px; border-bottom: 1px solid var(--border); text-align: left; vertical-align: middle; }
+.shares th { font-size: 12px; font-weight: 600; color: var(--muted); text-transform: uppercase; }
+.shares code { font-size: 13px; }
+.shares .actions { display: flex; gap: 6px; justify-content: flex-end; }
+.label-input { width: 100%; }
+
+.select-cell { display: inline-flex; align-items: center; gap: 6px; cursor: pointer; }
+.badge {
+  display: inline-block;
+  min-width: 20px;
+  padding: 1px 6px;
+  border-radius: 10px;
+  background: var(--accent);
+  color: var(--accent-text);
+  font-size: 12px;
+  text-align: center;
+}
+
+.status { display: inline-flex; align-items: center; gap: 6px; font-size: 13px; white-space: nowrap; }
+.status::before { content: ""; width: 9px; height: 9px; border-radius: 50%; background: var(--inactive); }
+.status-active { color: var(--active); }
+.status-active::before { background: var(--active); }
+.status-inactive { color: var(--muted); }
+.status-checking::before { background: transparent; border: 2px solid var(--inactive); }
+
+/* Hidden status probes: kept rendered (not display:none) so the VDO viewer runs normally. */
+.probe-container {
+  position: fixed;
+  left: -10px;
+  top: -10px;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  opacity: 0;
+  pointer-events: none;
+}
+.probe-container iframe { width: 1px; height: 1px; border: 0; }
+
+@media (max-width: 720px) {
+  .shares thead { display: none; }
+  .shares tr { display: grid; grid-template-columns: auto 1fr; gap: 6px 10px; padding: 10px 0; border-bottom: 1px solid var(--border); }
+  .shares td { border: 0; padding: 0; }
+  .shares td:last-child { grid-column: 1 / -1; }
+  .shares .actions { justify-content: flex-start; flex-wrap: wrap; }
+}
+
+/* ---------- Page 2: display ---------- */
+
+.view-page { background: #000; overflow: hidden; }
+
+.stage {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  background: #000;
+}
+.stage.layout-row { flex-direction: row; }
+.stage.layout-col { flex-direction: column; }
+
+.feed {
+  position: relative;
+  min-width: 0;
+  min-height: 0;
+  overflow: hidden;
+  background: #000;
+}
+.feed iframe {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  border: 0;
+}
+
+.feed-tag {
+  position: absolute;
+  top: 8px;
+  left: 8px;
+  padding: 2px 8px;
+  border-radius: 10px;
+  background: rgba(0, 0, 0, 0.55);
+  color: #fff;
+  font-size: 12px;
+  pointer-events: none;
+}
+
+.divider {
+  order: 2;
+  flex: 0 0 6px;
+  background: #2a2d33;
+  cursor: col-resize;
+  touch-action: none;
+}
+.divider:hover { background: #3b82f6; }
+.layout-col .divider { cursor: row-resize; }
+
+/* Thumbnail mode: one feed fills the stage, the other floats on top. */
+.mode-thumb .divider { display: none; }
+.feed.role-main { position: absolute; inset: 0; z-index: 1; }
+.feed.role-thumb {
+  position: absolute;
+  z-index: 2;
+  border-radius: var(--radius);
+  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.6);
+  outline: 2px solid rgba(255, 255, 255, 0.35);
+}
+
+.feed-grab, .feed-resize { display: none; touch-action: none; }
+.role-thumb .feed-grab { display: block; position: absolute; inset: 0; cursor: move; }
+.role-thumb .feed-resize {
+  display: block;
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  width: 18px;
+  height: 18px;
+  cursor: nwse-resize;
+  background: linear-gradient(135deg, transparent 50%, rgba(255, 255, 255, 0.8) 50%);
+}
+
+.drag-shield { display: none; position: fixed; inset: 0; z-index: 10; }
+.drag-shield.active { display: block; }
+.drag-shield[data-kind="move"] { cursor: move; }
+.drag-shield[data-kind="resize"] { cursor: nwse-resize; }
+.layout-row ~ .drag-shield[data-kind="split"] { cursor: col-resize; }
+.layout-col ~ .drag-shield[data-kind="split"] { cursor: row-resize; }
+
+/* Centered under the controls so it does not cover the default thumbnail corner. */
+.controls-hotzone { position: fixed; left: 30%; right: 30%; bottom: 0; height: 64px; z-index: 5; }
+
+.controls {
+  position: fixed;
+  left: 50%;
+  bottom: 16px;
+  transform: translateX(-50%);
+  z-index: 6;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 12px;
+  max-width: calc(100vw - 32px);
+  padding: 8px;
+  border-radius: var(--radius);
+  background: rgba(20, 22, 26, 0.85);
+  transition: opacity 0.25s;
+}
+.controls.hidden { opacity: 0; pointer-events: none; }
+.control-group { display: flex; gap: 4px; }
+.controls button { background: #2a2d33; border-color: #3a3e46; color: #e8eaed; }
+.controls button.active { background: #3b82f6; border-color: #3b82f6; color: #fff; }
+
+.view-error {
+  max-width: 480px;
+  margin: 15vh auto 0;
+  padding: 24px 16px;
+  color: #e8eaed;
+  text-align: center;
+}

@@ -1,122 +1,87 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Remove Duplicates - remove duplicate lines from your texts</title>
-    <script data-ad-client="ca-pub-7215565290441098" async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
-    <!-- Global site tag (gtag.js) - Google Analytics -->
-    <script async src="https://www.googletagmanager.com/gtag/js?id=UA-158701945-1"></script>
-    <script>
-        window.dataLayer = window.dataLayer || [];
-        function gtag(){dataLayer.push(arguments);}
-        gtag('js', new Date());
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Tools</title>
+  <style>
+    :root {
+      --bg: #f6f7f9;
+      --surface: #ffffff;
+      --text: #1c1f24;
+      --muted: #6a7280;
+      --border: #dde1e7;
+      --accent: #2563eb;
+      --radius: 8px;
+      font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    }
 
-        gtag('config', 'UA-158701945-1');
-    </script>
-    <style>
-        body {
-            margin: 0;
-            background: #eee;
-            height: 100vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-family: Arial, Helvetica, sans-serif;
-        }
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg: #121418;
+        --surface: #1b1e24;
+        --text: #e8eaed;
+        --muted: #9aa1ad;
+        --border: #2e333b;
+        --accent: #3b82f6;
+      }
+    }
 
-        .header {
-            margin-bottom: 30px;
-            color: #3d3d3d;
-            text-align: center;
-        }
-        .header .title {
-            margin: 0;
-            font-weight: normal;
-            font-size: 2rem;
-        }
-        .header .subtitle {
-            color: #999;
-        }
-        .header .subtitle a {
-            text-decoration: none;
-            color:inherit;
-        }
-        .header .subtitle a:hover {
-            text-decoration: underline;
-            color:inherit;
-        }
-        .input {
-            display: flex;
-            flex-wrap: wrap;
-            justify-content: center;
-        }
-        .input>div {
-            margin: 10px 5px;
-            text-align: center;
-            min-width: 250px;
-            width: 40vw;
-        }
-        textarea {
-            height: 30vw;
-            min-height: 200px;
-            width: 100%;
-            resize: none;
-            display: block;
-        }
-        button {
-            border: none;
-            border-radius: 4px;
-            color: #eee;
-            background: #333;
-            padding: 8px;
-            text-transform: uppercase;
-        }
-    </style>
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--text);
+    }
+
+    .container {
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 48px 16px;
+    }
+
+    h1 { margin: 0 0 4px; }
+    .muted { color: var(--muted); margin: 0 0 24px; }
+
+    .tools {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+      gap: 16px;
+      padding: 0;
+      margin: 0;
+      list-style: none;
+    }
+
+    .tool {
+      display: block;
+      height: 100%;
+      padding: 16px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      color: inherit;
+      text-decoration: none;
+    }
+    .tool:hover, .tool:focus-visible { border-color: var(--accent); }
+    .tool h2 { margin: 0 0 6px; font-size: 18px; color: var(--accent); }
+    .tool p { margin: 0; color: var(--muted); font-size: 14px; }
+  </style>
 </head>
 <body>
-    <div class="wrapper">
-        <div class="header">
-            <h1 class="title">Remove Duplicates</h1>
-            <div class="subtitle">a service by <a href="http://github.com/flaviold">flaviold</a></div>
-        </div>
-        <div class="input">
-            <div>
-                <textarea id="data-in" onchange="inputModified()" onkeydown="inputModified()"></textarea>
-                <div>Lines: <span id="data-in-lines">0</span></div>
-                <button type="button" onclick="removeLines()">Remove duplicates</button>
-            </div>
-            <div>
-                <textarea id="data-out"></textarea>
-                <div>Lines: <span id="data-out-lines">0</span></div>
-                <button type="button" onclick="copyText()">Copy to clipboard</button>
-            </div>
-        </div>
-    </div>
+  <main class="container">
+    <h1>Tools</h1>
+    <p class="muted">Small browser-based tools. Everything runs in your browser.</p>
 
-    <script>
-        let dataIn  = document.getElementById('data-in');
-        let linesDataIn = document.getElementById('data-in-lines');
-        let dataOut = document.getElementById('data-out');
-        let linesDataOut = document.getElementById('data-out-lines');
-
-        function removeLines() {
-            let data = dataIn.value;
-            dataOut.value = data
-                .split('\n')
-                .reduce((acc, cur) => acc.includes(cur.trim()) ? acc : [...acc, cur.trim()], [])
-                .join('\n');
-            linesDataOut.innerText = dataOut.value.split('\n').length;
-        }
-
-        function inputModified() {
-            linesDataIn.innerText = dataIn.value.split('\n').length;
-        }
-
-        function copyText() {
-            dataOut.select();
-            document.execCommand("copy")
-        }
-    </script>
+    <!-- Add one <li> per tool under /tools/. -->
+    <ul class="tools">
+      <li>
+        <a class="tool" href="tools/vdo-share/">
+          <h2>VDO Share</h2>
+          <p>Create camera or screen sharing links with VDO.Ninja and show two feeds together on one display page.</p>
+        </a>
+      </li>
+    </ul>
+  </main>
 </body>
 </html>

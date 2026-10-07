@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>VDO Share</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body class="list-page">
+  <div id="app" class="container" v-cloak>
+    <header class="page-header">
+      <h1>VDO Share</h1>
+      <p class="muted">Create links for people to share their camera or screen, then combine two of them into a display page.</p>
+    </header>
+
+    <section class="card">
+      <h2>New share link</h2>
+      <form class="row" @submit.prevent="createShare">
+        <input v-model.trim="newLabel" type="text" maxlength="60" placeholder="Label (optional)" aria-label="Label">
+        <button type="submit" class="primary">Generate link</button>
+      </form>
+      <div v-if="lastCreated" class="link-box">
+        <span class="muted">Send this link to the person who will share:</span>
+        <div class="row">
+          <input :value="pushUrl(lastCreated)" readonly @focus="$event.target.select()" aria-label="Share link">
+          <button type="button" @click="copy(pushUrl(lastCreated), 'last')">{{ copiedKey === 'last' ? 'Copied!' : 'Copy' }}</button>
+        </div>
+      </div>
+    </section>
+
+    <section class="card">
+      <div class="section-title">
+        <h2>Shares</h2>
+        <span class="muted small">Status refreshes every {{ pollSeconds }}s</span>
+      </div>
+
+      <p v-if="!shares.length" class="muted">No shares yet. Generate a link above.</p>
+
+      <table v-else class="shares">
+        <thead>
+          <tr>
+            <th title="Select two shares for the display page">Display</th>
+            <th>Status</th>
+            <th>Label</th>
+            <th>ID</th>
+            <th>Created</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr v-for="share in shares" :key="share.streamId">
+            <td>
+              <label class="select-cell">
+                <input type="checkbox"
+                       :checked="selected.includes(share.streamId)"
+                       :disabled="selected.length >= 2 && !selected.includes(share.streamId)"
+                       @change="toggleSelect(share.streamId)">
+                <span v-if="selected.includes(share.streamId)" class="badge">{{ selected.indexOf(share.streamId) === 0 ? 'A' : 'B' }}</span>
+              </label>
+            </td>
+            <td>
+              <span class="status" :class="'status-' + (statuses[share.streamId] || 'checking')">
+                {{ statusText(statuses[share.streamId]) }}
+              </span>
+            </td>
+            <td>
+              <input class="label-input" type="text" maxlength="60" placeholder="—"
+                     :value="share.label" @change="updateLabel(share, $event.target.value)" aria-label="Label">
+            </td>
+            <td><code>{{ share.streamId }}</code></td>
+            <td class="muted small">{{ formatDate(share.createdAt) }}</td>
+            <td>
+              <div class="actions">
+                <button type="button" @click="copy(pushUrl(share), share.streamId)">{{ copiedKey === share.streamId ? 'Copied!' : 'Copy link' }}</button>
+                <a class="button" :href="previewUrl(share)" target="_blank" rel="noopener">Preview</a>
+                <button type="button" class="danger" @click="removeShare(share)">Remove</button>
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <section class="card">
+      <h2>Display page</h2>
+      <p class="muted" v-if="selected.length < 2">Select two shares in the list ({{ selected.length }}/2 selected). The first one selected is feed A.</p>
+      <div v-else class="link-box">
+        <div class="row">
+          <input :value="displayUrl" readonly @focus="$event.target.select()" aria-label="Display link">
+          <button type="button" @click="copy(displayUrl, 'display')">{{ copiedKey === 'display' ? 'Copied!' : 'Copy' }}</button>
+          <a class="button primary" :href="displayUrl" target="_blank" rel="noopener">Open</a>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/vue/3.5.13/vue.global.prod.min.js"></script>
+  <script src="js/config.js"></script>
+  <script src="js/vdo.js"></script>
+  <script src="js/storage.js"></script>
+  <script src="js/status.js"></script>
+  <script src="js/list-app.js"></script>
+</body>
+</html>
