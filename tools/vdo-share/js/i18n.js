@@ -46,6 +46,8 @@
       "display.hint": "Select two shares in the list ({n}/2 selected). The first one selected is feed A.",
       "display.linkAria": "Display link",
 
+      "demo.camera": "Camera",
+      "demo.screen": "Screen",
       "tour.step": "Step {n} of {total}",
       "tour.skip": "Skip",
       "tour.back": "Back",
@@ -119,6 +121,8 @@
       "display.hint": "Selecione dois compartilhamentos na lista ({n}/2 selecionados). O primeiro selecionado é o feed A.",
       "display.linkAria": "Link de exibição",
 
+      "demo.camera": "Câmera",
+      "demo.screen": "Tela",
       "tour.step": "Passo {n} de {total}",
       "tour.skip": "Pular",
       "tour.back": "Voltar",

@@ -30,13 +30,22 @@
         pollSeconds: Math.round(ns.config.POLL_INTERVAL_MS / 1000),
         tourSteps: TOUR_STEPS,
         tourOpen: !isTourDone(),
+        demo: null, // mock { shares, selected, statuses, lastCreated } shown while the tour runs
+        cursor: { x: window.innerWidth / 2, y: window.innerHeight / 2, visible: false, clicking: false },
       };
     },
 
     computed: {
+      // What the list renders: the tour's mock data while it runs, the real data otherwise.
+      ui() {
+        if (this.demo) return this.demo;
+        const { shares, selected, statuses, lastCreated } = this;
+        return { shares, selected, statuses, lastCreated };
+      },
+
       displayUrl() {
-        if (this.selected.length !== 2) return "";
-        const [a, b] = this.selected;
+        if (this.ui.selected.length !== 2) return "";
+        const [a, b] = this.ui.selected;
         return new URL(`view.html?a=${a}&b=${b}`, window.location.href).href;
       },
     },
@@ -102,11 +111,21 @@
       },
 
       startTour() {
+        this.labelBeforeTour = this.newLabel;
         this.tourOpen = true;
       },
 
+      playTourDemo(step) {
+        ns.tourDemo.play(this, step);
+      },
+
       closeTour() {
+        ns.tourDemo.stop();
         this.tourOpen = false;
+        this.demo = null;
+        this.newLabel = this.labelBeforeTour || "";
+        this.copiedKey = null;
+        this.cursor.visible = false;
         try {
           localStorage.setItem(ns.config.TOUR_DONE_KEY, "1");
         } catch (e) {

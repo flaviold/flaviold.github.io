@@ -7,7 +7,7 @@
 
   ns.TourOverlay = {
     props: { steps: { type: Array, required: true } },
-    emits: ["close"],
+    emits: ["close", "step"],
 
     data() {
       return { index: 0, spot: null, tipStyle: {} };
@@ -39,6 +39,9 @@
       </div>`,
 
     mounted() {
+      // Reposition when the highlighted content changes size (e.g. the demo adds rows).
+      this.resizeObserver = new ResizeObserver(() => this.position());
+      this.resizeObserver.observe(document.body);
       window.addEventListener("resize", this.position);
       window.addEventListener("scroll", this.position, true);
       document.addEventListener("keydown", this.onKey);
@@ -46,6 +49,7 @@
     },
 
     unmounted() {
+      this.resizeObserver.disconnect();
       window.removeEventListener("resize", this.position);
       window.removeEventListener("scroll", this.position, true);
       document.removeEventListener("keydown", this.onKey);
@@ -62,6 +66,7 @@
 
       async go(index) {
         this.index = index;
+        this.$emit("step", index);
         await this.$nextTick();
         const el = this.target();
         if (el) el.scrollIntoView({ block: "center" });

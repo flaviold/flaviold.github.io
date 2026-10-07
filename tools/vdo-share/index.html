@@ -22,14 +22,14 @@
     <section class="card" data-tour="create">
       <h2>{{ $t('create.title') }}</h2>
       <form class="row" @submit.prevent="createShare">
-        <input v-model.trim="newLabel" type="text" maxlength="60" :placeholder="$t('create.labelPlaceholder')" :aria-label="$t('create.labelAria')">
-        <button type="submit" class="primary">{{ $t('create.submit') }}</button>
+        <input v-model.trim="newLabel" data-demo="label" type="text" maxlength="60" :placeholder="$t('create.labelPlaceholder')" :aria-label="$t('create.labelAria')">
+        <button type="submit" class="primary" data-demo="generate">{{ $t('create.submit') }}</button>
       </form>
-      <div v-if="lastCreated" class="link-box">
+      <div v-if="ui.lastCreated" class="link-box">
         <span class="muted">{{ $t('create.sendHint') }}</span>
         <div class="row">
-          <input :value="pushUrl(lastCreated)" readonly @focus="$event.target.select()" :aria-label="$t('create.linkAria')">
-          <button type="button" @click="copy(pushUrl(lastCreated), 'last')">{{ copiedKey === 'last' ? $t('action.copied') : $t('action.copy') }}</button>
+          <input :value="pushUrl(ui.lastCreated)" readonly @focus="$event.target.select()" :aria-label="$t('create.linkAria')">
+          <button type="button" data-demo="copy-last" @click="copy(pushUrl(ui.lastCreated), 'last')">{{ copiedKey === 'last' ? $t('action.copied') : $t('action.copy') }}</button>
         </div>
       </div>
     </section>
@@ -40,7 +40,7 @@
         <span class="muted small">{{ $t('shares.refresh', { s: pollSeconds }) }}</span>
       </div>
 
-      <p v-if="!shares.length" class="muted">{{ $t('shares.empty') }}</p>
+      <p v-if="!ui.shares.length" class="muted">{{ $t('shares.empty') }}</p>
 
       <table v-else class="shares">
         <thead>
@@ -54,20 +54,21 @@
           </tr>
         </thead>
         <tbody>
-          <tr v-for="share in shares" :key="share.streamId">
+          <tr v-for="share in ui.shares" :key="share.streamId">
             <td>
               <label class="select-cell">
                 <input type="checkbox"
-                       :checked="selected.includes(share.streamId)"
-                       :disabled="selected.length >= 2 && !selected.includes(share.streamId)"
+                       :checked="ui.selected.includes(share.streamId)"
+                       :disabled="ui.selected.length >= 2 && !ui.selected.includes(share.streamId)"
+                       :data-demo="'select-' + share.streamId"
                        :aria-label="$t('shares.colDisplay')"
                        @change="toggleSelect(share.streamId)">
-                <span v-if="selected.includes(share.streamId)" class="badge">{{ selected.indexOf(share.streamId) === 0 ? 'A' : 'B' }}</span>
+                <span v-if="ui.selected.includes(share.streamId)" class="badge">{{ ui.selected.indexOf(share.streamId) === 0 ? 'A' : 'B' }}</span>
               </label>
             </td>
             <td>
-              <span class="status" :class="'status-' + (statuses[share.streamId] || 'checking')">
-                {{ $t('status.' + (statuses[share.streamId] || 'checking')) }}
+              <span class="status" :class="'status-' + (ui.statuses[share.streamId] || 'checking')">
+                {{ $t('status.' + (ui.statuses[share.streamId] || 'checking')) }}
               </span>
             </td>
             <td>
@@ -78,7 +79,7 @@
             <td class="muted small">{{ formatDate(share.createdAt) }}</td>
             <td>
               <div class="actions">
-                <button type="button" @click="copy(pushUrl(share), share.streamId)">{{ copiedKey === share.streamId ? $t('action.copied') : $t('action.copyLink') }}</button>
+                <button type="button" :data-demo="'copy-' + share.streamId" @click="copy(pushUrl(share), share.streamId)">{{ copiedKey === share.streamId ? $t('action.copied') : $t('action.copyLink') }}</button>
                 <a class="button" :href="previewUrl(share)" target="_blank" rel="noopener">{{ $t('action.preview') }}</a>
                 <button type="button" class="danger" @click="removeShare(share)">{{ $t('action.remove') }}</button>
               </div>
@@ -90,17 +91,22 @@
 
     <section class="card" data-tour="display">
       <h2>{{ $t('display.title') }}</h2>
-      <p class="muted" v-if="selected.length < 2">{{ $t('display.hint', { n: selected.length }) }}</p>
+      <p class="muted" v-if="ui.selected.length < 2">{{ $t('display.hint', { n: ui.selected.length }) }}</p>
       <div v-else class="link-box">
         <div class="row">
           <input :value="displayUrl" readonly @focus="$event.target.select()" :aria-label="$t('display.linkAria')">
-          <button type="button" @click="copy(displayUrl, 'display')">{{ copiedKey === 'display' ? $t('action.copied') : $t('action.copy') }}</button>
-          <a class="button primary" :href="displayUrl" target="_blank" rel="noopener">{{ $t('action.open') }}</a>
+          <button type="button" data-demo="copy-display" @click="copy(displayUrl, 'display')">{{ copiedKey === 'display' ? $t('action.copied') : $t('action.copy') }}</button>
+          <a class="button primary" data-demo="open-display" :href="displayUrl" target="_blank" rel="noopener">{{ $t('action.open') }}</a>
         </div>
       </div>
     </section>
 
-    <tour-overlay v-if="tourOpen" :steps="tourSteps" @close="closeTour"></tour-overlay>
+    <tour-overlay v-if="tourOpen" :steps="tourSteps" @step="playTourDemo" @close="closeTour"></tour-overlay>
+    <svg v-if="tourOpen" class="demo-cursor" :class="{ visible: cursor.visible, clicking: cursor.clicking }"
+         :style="{ transform: `translate(${cursor.x}px, ${cursor.y}px)` }"
+         width="22" height="26" viewBox="0 0 22 26" aria-hidden="true">
+      <path d="M2 2 L2 21 L7 16.5 L10.5 24 L14 22.5 L10.5 15 L17.5 15 Z" fill="#fff" stroke="#111" stroke-width="1.6" stroke-linejoin="round"/>
+    </svg>
   </div>
 
   <script src="https://cdnjs.cloudflare.com/ajax/libs/vue/3.5.13/vue.global.prod.min.js"></script>
@@ -110,6 +116,7 @@
   <script src="js/storage.js"></script>
   <script src="js/status.js"></script>
   <script src="js/tour.js"></script>
+  <script src="js/tour-demo.js"></script>
   <script src="js/list-app.js"></script>
 </body>
 </html>
