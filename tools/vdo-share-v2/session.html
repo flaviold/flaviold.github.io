@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>VDO Share v2</title>
+  <link rel="stylesheet" href="css/style.css">
+  <script src="../../js/analytics.js"></script>
+</head>
+<body class="session-page">
+  <div id="app" v-cloak>
+    <!-- Before the session: join form, connecting, errors -->
+    <div v-if="phase !== 'session'" class="container narrow">
+      <header class="page-header">
+        <div class="section-title">
+          <h1>{{ $t('app.title') }}</h1>
+          <lang-switch></lang-switch>
+        </div>
+      </header>
+
+      <form v-if="phase === 'join'" class="card form" @submit.prevent="join" novalidate>
+        <h2>{{ $t('join.title') }}</h2>
+        <p class="muted">{{ $t('join.intro') }}</p>
+        <div class="field">
+          <label for="nickname">{{ $t('create.nickname') }}</label>
+          <input id="nickname" v-model="form.nickname" type="text" :maxlength="nicknameMax"
+                 :placeholder="$t('create.nicknamePlaceholder')" autocomplete="nickname">
+        </div>
+        <div v-if="needsPassword" class="field">
+          <label for="password">{{ $t('join.password') }}</label>
+          <p class="muted small">{{ $t('join.passwordIntro') }}</p>
+          <input id="password" v-model="form.password" type="password" autocomplete="current-password">
+        </div>
+        <p v-if="formError" class="error small" role="alert">{{ $t(formError) }}</p>
+        <button type="submit" class="primary large">{{ $t('join.submit') }}</button>
+      </form>
+
+      <div v-else-if="phase === 'connecting'" class="card center" role="status">
+        <div class="spinner" aria-hidden="true"></div>
+        <h2>{{ $t('join.connecting') }}</h2>
+        <p class="muted">{{ $t('join.connectingHint') }}</p>
+      </div>
+
+      <div v-else class="card">
+        <h2>{{ $t('error.title') }}</h2>
+        <p>{{ $t(errorKey) }}</p>
+        <div class="row">
+          <button v-if="errorKey === 'error.notFound'" type="button" class="primary" @click="retry">{{ $t('error.retry') }}</button>
+          <a class="button" href="./">{{ $t('error.newSession') }}</a>
+        </div>
+      </div>
+    </div>
+
+    <!-- The session -->
+    <div v-else class="session">
+      <header class="session-bar">
+        <div class="bar-title">
+          <h1>{{ $t('session.title') }}</h1>
+          <span class="counter" :class="{ full: isFull }">{{ $t('session.screens', { n: ui.shares.length, limit: ui.limit }) }}</span>
+        </div>
+        <div class="bar-actions">
+          <button type="button" @click="copyLink(false)">{{ copied === 'link' ? $t('session.copied') : $t('session.copyLink') }}</button>
+          <button v-if="password" type="button" @click="copyLink(true)">{{ copied === 'linkPassword' ? $t('session.copied') : $t('session.copyLinkPassword') }}</button>
+          <button v-if="ui.sharing" type="button" class="primary" :disabled="shareDisabled" @click="stopShare">
+            {{ ui.live ? $t('session.stopShare') : $t('session.connectingShare') }}
+          </button>
+          <span v-else class="share-group">
+            <button type="button" class="primary" :disabled="shareDisabled"
+                    :title="isFull ? $t('session.full', { limit: ui.limit }) : ''" @click="share('screen')">{{ $t('session.share') }}</button>
+            <button type="button" class="primary" :disabled="shareDisabled"
+                    :title="isFull ? $t('session.full', { limit: ui.limit }) : ''" @click="share('camera')">{{ $t('session.shareCamera') }}</button>
+          </span>
+          <lang-switch></lang-switch>
+          <button type="button" class="danger" @click="leave">{{ $t('session.leave') }}</button>
+        </div>
+        <ul class="participants" :aria-label="$t('session.participants')">
+          <li v-for="p in ui.roster" :key="p.peerId" :class="{ me: p.peerId === ui.me.peerId }">
+            <button v-if="p.peerId === ui.me.peerId" type="button" class="chip" :title="$t('session.rename')" @click="rename">
+              {{ p.nickname }} <span class="muted">({{ $t('session.you') }})</span>
+            </button>
+            <span v-else class="chip">{{ p.nickname }}</span>
+            <span v-if="p.peerId === ui.hostId" class="host-badge">★ {{ $t('session.host') }}</span>
+          </li>
+        </ul>
+      </header>
+
+      <div v-if="notice" class="notice" role="status">
+        <span>{{ $t(notice) }}</span>
+        <button type="button" class="link" :aria-label="$t('notice.close')" @click="notice = null">×</button>
+      </div>
+
+      <main class="grid-area">
+        <div v-if="!tiles.length" class="empty">
+          <h2>{{ $t('session.empty') }}</h2>
+          <p class="muted">{{ $t('session.emptyHint') }}</p>
+        </div>
+        <div v-else class="grid" :class="{ 'has-focus': focusedTile }" :style="gridStyle">
+          <div v-for="tile in tiles" :key="tile.peerId" class="tile"
+               :class="{ 'is-focused': focusedTile === tile.peerId, 'is-me': tile.isMe }"
+               :title="focusedTile === tile.peerId ? $t('session.unfocusTitle') : $t('session.focusTitle')"
+               @click="toggleFocus(tile.peerId)">
+            <video-view v-if="tile.stream" :stream="tile.stream" :muted="tile.isMe || !unmuted[tile.peerId]" :class="{ mirror: tile.mirror }"></video-view>
+            <div v-else class="tile-waiting">{{ $t('session.waitingVideo') }}</div>
+            <div class="tile-bar">
+              <span class="tile-name">{{ tile.isMe ? $t(ui.shareKind === 'camera' ? 'session.yourCamera' : 'session.yourScreen') : tile.nickname }}</span>
+              <button v-if="!tile.isMe && tile.hasAudio" type="button" @click.stop="toggleMute(tile.peerId)">
+                {{ unmuted[tile.peerId] ? $t('session.mute') : $t('session.unmute') }}
+              </button>
+              <button v-if="ui.isHost && !tile.isMe" type="button" class="danger"
+                      :title="$t('session.stopThisTitle')" @click.stop="hostStop(tile.peerId)">{{ $t('session.stopThis') }}</button>
+            </div>
+          </div>
+        </div>
+      </main>
+    </div>
+
+  </div>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/vue/3.5.13/vue.global.prod.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@vdoninja/sdk@1.6.2/vdoninja-sdk.js"></script>
+  <script src="js/config.js"></script>
+  <script src="js/i18n.js"></script>
+  <script src="js/session-core.js"></script>
+  <script src="js/session-app.js"></script>
+</body>
+</html>
