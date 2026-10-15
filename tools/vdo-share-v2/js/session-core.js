@@ -485,9 +485,17 @@
       }
       stream.getTracks().filter((t) => t.kind === track.kind).forEach((t) => stream.removeTrack(t));
       stream.addTrack(track);
+      // Tracks also end when the SDK swaps a connection internally and delivers new ones, so an ended
+      // track only hides the stream if nothing live replaced it shortly after. It never stops viewing:
+      // real removals come from the protocol (share-stopped, state, peer leaving).
       track.addEventListener("ended", () => {
-        const current = this.streams.get(peerId);
-        if (current === stream && stream.getTracks().every((t) => t.readyState === "ended")) this.dropStream(peerId);
+        setTimeout(() => {
+          const current = this.streams.get(peerId);
+          if (current === stream && stream.getTracks().every((t) => t.readyState === "ended")) {
+            this.streams.delete(peerId);
+            this.emit("streams");
+          }
+        }, 2000);
       });
       this.emit("streams");
     }

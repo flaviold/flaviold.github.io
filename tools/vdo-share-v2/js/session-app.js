@@ -5,6 +5,10 @@
   const { track } = ns;
 
   const NOTICE_MS = 6000;
+  const STRIP_HEIGHT = "130px"; // row of unpinned tiles under the pinned ones
+
+  const gcd = (a, b) => (b ? gcd(b, a % b) : a);
+  const lcm = (a, b) => (a * b) / gcd(a, b);
   const EMPTY_STATE = { me: {}, hostId: null, isHost: false, limit: 0, roster: [], shares: [], sharing: false, shareKind: null, live: false, pending: false };
 
   const params = new URLSearchParams(window.location.search);
@@ -59,6 +63,7 @@
         snap: null, // SessionClient snapshot
         streamsVersion: 0, // bumped when remote streams change (MediaStreams are not reactive)
         focused: null,
+        pinned: [], // peer IDs pinned by this viewer, in pin order
         unmuted: {},
         copied: null,
         notice: null, // i18n key
@@ -96,11 +101,40 @@
         return this.tiles.some((tile) => tile.peerId === this.focused) ? this.focused : null;
       },
 
-      gridStyle() {
-        const n = this.tiles.length;
-        if (this.focusedTile) return { "--others": Math.max(n - 1, 1) };
-        const cols = Math.ceil(Math.sqrt(n));
-        return { "--cols": cols, "--rows": Math.ceil(n / cols) };
+      // Grid layout. The tiles keep their DOM order (moving a <video> can interrupt playback), so
+      // pinned-first ordering and the pinned/strip split are done purely with CSS grid placement.
+      layout() {
+        const tiles = this.tiles;
+        const pinned = this.pinned.filter((id) => tiles.some((t) => t.peerId === id));
+        const others = tiles.filter((t) => !pinned.includes(t.peerId)).map((t) => t.peerId);
+        const order = (id) => (pinned.includes(id) ? pinned.indexOf(id) : pinned.length + others.indexOf(id));
+        const result = { mode: "", container: {}, tiles: {} };
+
+        if (this.focusedTile) {
+          result.mode = "has-focus";
+          result.container = { "--others": Math.max(tiles.length - 1, 1) };
+          tiles.forEach((t) => { result.tiles[t.peerId] = { order: order(t.peerId) }; });
+        } else if (pinned.length && others.length) {
+          // Pinned tiles in a large grid on top, the others in a strip below. Columns use the LCM so
+          // both rows can be split evenly.
+          const pinCols = Math.ceil(Math.sqrt(pinned.length));
+          const pinRows = Math.ceil(pinned.length / pinCols);
+          const columns = lcm(pinCols, others.length);
+          result.mode = "pin-layout";
+          result.container = {
+            gridTemplateColumns: `repeat(${columns}, minmax(0, 1fr))`,
+            gridTemplateRows: `repeat(${pinRows}, minmax(0, 1fr)) ${STRIP_HEIGHT}`,
+          };
+          pinned.forEach((id, i) => { result.tiles[id] = { order: i, gridColumn: `span ${columns / pinCols}` }; });
+          others.forEach((id, i) => {
+            result.tiles[id] = { order: pinned.length + i, gridColumn: `span ${columns / others.length}`, gridRow: pinRows + 1 };
+          });
+        } else {
+          const cols = Math.ceil(Math.sqrt(tiles.length));
+          result.container = { "--cols": cols, "--rows": Math.ceil(tiles.length / cols) };
+          tiles.forEach((t) => { result.tiles[t.peerId] = { order: order(t.peerId) }; });
+        }
+        return result;
       },
 
       isFull() {
@@ -247,6 +281,19 @@
       toggleFocus(peerId) {
         this.focused = this.focusedTile === peerId ? null : peerId;
         if (this.focused) track("tile-focused");
+      },
+
+      isPinned(peerId) {
+        return this.pinned.includes(peerId);
+      },
+
+      togglePin(peerId) {
+        if (this.isPinned(peerId)) {
+          this.pinned = this.pinned.filter((id) => id !== peerId);
+        } else {
+          this.pinned = [...this.pinned.filter((id) => this.tiles.some((t) => t.peerId === id)), peerId];
+          track("tile-pinned");
+        }
       },
 
       toggleMute(peerId) {

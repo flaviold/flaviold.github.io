@@ -94,15 +94,19 @@
           <h2>{{ $t('session.empty') }}</h2>
           <p class="muted">{{ $t('session.emptyHint') }}</p>
         </div>
-        <div v-else class="grid" :class="{ 'has-focus': focusedTile }" :style="gridStyle">
-          <div v-for="tile in tiles" :key="tile.peerId" class="tile"
-               :class="{ 'is-focused': focusedTile === tile.peerId, 'is-me': tile.isMe }"
+        <div v-else class="grid" :class="layout.mode" :style="layout.container">
+          <div v-for="tile in tiles" :key="tile.peerId" class="tile" :style="layout.tiles[tile.peerId]"
+               :class="{ 'is-focused': focusedTile === tile.peerId, 'is-me': tile.isMe, 'is-pinned': isPinned(tile.peerId) }"
                :title="focusedTile === tile.peerId ? $t('session.unfocusTitle') : $t('session.focusTitle')"
                @click="toggleFocus(tile.peerId)">
             <video-view v-if="tile.stream" :stream="tile.stream" :muted="tile.isMe || !unmuted[tile.peerId]" :class="{ mirror: tile.mirror }"></video-view>
             <div v-else class="tile-waiting">{{ $t('session.waitingVideo') }}</div>
             <div class="tile-bar">
               <span class="tile-name">{{ tile.isMe ? $t(ui.shareKind === 'camera' ? 'session.yourCamera' : 'session.yourScreen') : tile.nickname }}</span>
+              <button type="button" class="pin" :class="{ active: isPinned(tile.peerId) }" :aria-pressed="isPinned(tile.peerId)"
+                      :title="$t(isPinned(tile.peerId) ? 'session.unpinTitle' : 'session.pinTitle')" @click.stop="togglePin(tile.peerId)">
+                {{ isPinned(tile.peerId) ? $t('session.unpin') : $t('session.pin') }}
+              </button>
               <button v-if="!tile.isMe && tile.hasAudio" type="button" @click.stop="toggleMute(tile.peerId)">
                 {{ unmuted[tile.peerId] ? $t('session.mute') : $t('session.unmute') }}
               </button>

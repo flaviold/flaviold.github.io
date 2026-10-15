@@ -306,6 +306,8 @@ button.chip { cursor: pointer; }
 }
 .tile.is-focused { cursor: zoom-out; }
 .tile.is-me { outline: 2px solid var(--accent); outline-offset: -2px; }
+.tile.is-pinned { outline: 2px solid #f59e0b; outline-offset: -2px; }
+.tile-bar button.pin.active { background: #f59e0b; border-color: #f59e0b; color: #111; }
 .tile video, .tile-waiting { position: absolute; inset: 0; width: 100%; height: 100%; }
 .tile video { object-fit: contain; }
 .tile-waiting { display: flex; align-items: center; justify-content: center; color: #9aa1ad; font-size: 14px; }
@@ -325,6 +327,7 @@ button.chip { cursor: pointer; }
 .tile-bar button { padding: 3px 8px; font-size: 12px; background: rgba(20, 22, 26, 0.85); border-color: #3a3e46; color: #e8eaed; }
 .tile-bar button.danger { color: #ff8a80; }
 .grid.has-focus .tile:not(.is-focused) .tile-bar button { display: none; }
+.grid.pin-layout .tile:not(.is-pinned) .tile-bar button:not(.pin) { display: none; }
 
 @media (max-width: 720px) {
   .bar-actions { margin-left: 0; }
