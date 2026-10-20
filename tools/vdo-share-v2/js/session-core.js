@@ -15,6 +15,9 @@
 (function (ns) {
   const cfg = ns.config;
   const PREFIX = "vs2:";
+  // Without constraints browsers capture 640x480 and crop wider webcams to 4:3. Ask for HD and
+  // forbid cropping, so the camera's native mode closest to it is used with its own aspect ratio.
+  const CAMERA_VIDEO = { width: { ideal: 1280 }, height: { ideal: 720 }, resizeMode: "none" };
 
   class SessionClient {
     // options: { sessionId, password, nickname, peerId, creator, fresh, limit }
@@ -323,7 +326,7 @@
         return;
       }
       const stream = kind === "camera"
-        ? await navigator.mediaDevices.getUserMedia({ video: true, audio: true })
+        ? await navigator.mediaDevices.getUserMedia({ video: CAMERA_VIDEO, audio: true })
         : await navigator.mediaDevices.getDisplayMedia({ video: true, audio: true });
       if (this.closed || this.localStream) {
         stream.getTracks().forEach((t) => t.stop());
