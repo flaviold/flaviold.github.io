@@ -68,6 +68,7 @@
         copied: null,
         notice: null, // i18n key
         wasGuest: false,
+        isFullscreen: false,
       };
     },
 
@@ -148,6 +149,11 @@
 
     mounted() {
       if (this.phase === "connecting") this.connect();
+      const onFullscreenChange = () => {
+        this.isFullscreen = Boolean(document.fullscreenElement || document.webkitFullscreenElement);
+      };
+      document.addEventListener("fullscreenchange", onFullscreenChange);
+      document.addEventListener("webkitfullscreenchange", onFullscreenChange);
       document.addEventListener("keydown", (e) => {
         if (e.key === "Escape") this.focused = null;
       });
@@ -281,6 +287,20 @@
       toggleFocus(peerId) {
         this.focused = this.focusedTile === peerId ? null : peerId;
         if (this.focused) track("tile-focused");
+      },
+
+      // Only the screens area goes fullscreen (the session bar stays out); Safari needs the webkit API.
+      toggleFullscreen() {
+        if (document.fullscreenElement || document.webkitFullscreenElement) {
+          (document.exitFullscreen || document.webkitExitFullscreen).call(document);
+          return;
+        }
+        const el = this.$refs.gridArea;
+        if (!el) return;
+        const request = el.requestFullscreen || el.webkitRequestFullscreen;
+        if (!request) return;
+        Promise.resolve(request.call(el)).catch(() => {});
+        track("fullscreen");
       },
 
       isPinned(peerId) {

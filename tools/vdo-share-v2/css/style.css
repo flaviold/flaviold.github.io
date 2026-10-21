@@ -336,3 +336,19 @@ button.chip { cursor: pointer; }
 
 .share-group { display: inline-flex; gap: 6px; }
 .tile video.mirror { transform: scaleX(-1); }
+
+/* Fullscreen screens area: no session bar, black backdrop, exit button in the corner. */
+.grid-area:fullscreen { padding: 8px; background: #000; }
+.grid-area:-webkit-full-screen { padding: 8px; background: #000; }
+.exit-fullscreen {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  z-index: 5;
+  background: rgba(20, 22, 26, 0.85);
+  border-color: #3a3e46;
+  color: #e8eaed;
+  opacity: 0.6;
+  transition: opacity 0.2s;
+}
+.exit-fullscreen:hover, .exit-fullscreen:focus-visible { opacity: 1; }

@@ -70,6 +70,7 @@
             <button type="button" class="primary" :disabled="shareDisabled"
                     :title="isFull ? $t('session.full', { limit: ui.limit }) : ''" @click="share('camera')">{{ $t('session.shareCamera') }}</button>
           </span>
+          <button type="button" @click="toggleFullscreen">{{ $t('session.fullscreen') }}</button>
           <lang-switch></lang-switch>
           <button type="button" class="danger" @click="leave">{{ $t('session.leave') }}</button>
         </div>
@@ -89,7 +90,8 @@
         <button type="button" class="link" :aria-label="$t('notice.close')" @click="notice = null">×</button>
       </div>
 
-      <main class="grid-area">
+      <main ref="gridArea" class="grid-area">
+        <button v-if="isFullscreen" type="button" class="exit-fullscreen" @click="toggleFullscreen">{{ $t('session.exitFullscreen') }}</button>
         <div v-if="!tiles.length" class="empty">
           <h2>{{ $t('session.empty') }}</h2>
           <p class="muted">{{ $t('session.emptyHint') }}</p>
