@@ -64,6 +64,7 @@
         streamsVersion: 0, // bumped when remote streams change (MediaStreams are not reactive)
         focused: null,
         pinned: [], // peer IDs pinned by this viewer, in pin order
+        views: {}, // peer ID -> { rotate, mirror } set by this viewer
         unmuted: {},
         copied: null,
         notice: null, // i18n key
@@ -91,7 +92,7 @@
             peerId,
             nickname: this.nicknameOf(peerId),
             isMe,
-            mirror: isMe && this.snap.shareKind === "camera", // a self view reads naturally mirrored
+            mirror: isMe && this.snap.shareKind === "camera", // default: a self view reads naturally mirrored
             stream: stream && markRaw(stream),
             hasAudio: Boolean(stream && stream.getAudioTracks().length),
           };
@@ -301,6 +302,31 @@
         if (!request) return;
         Promise.resolve(request.call(el)).catch(() => {});
         track("fullscreen");
+      },
+
+      // Local display options per tile: rotation in 90° steps and a horizontal mirror.
+      viewOf(tile) {
+        const view = this.views[tile.peerId] || {};
+        return { rotate: view.rotate || 0, mirror: view.mirror ?? Boolean(tile.mirror) };
+      },
+
+      setView(tile, change) {
+        this.views = { ...this.views, [tile.peerId]: { ...this.viewOf(tile), ...change } };
+      },
+
+      rotate(tile) {
+        this.setView(tile, { rotate: (this.viewOf(tile).rotate + 90) % 360 });
+        track("tile-rotated");
+      },
+
+      toggleMirror(tile) {
+        this.setView(tile, { mirror: !this.viewOf(tile).mirror });
+        track("tile-mirrored");
+      },
+
+      videoStyle(tile) {
+        const { rotate, mirror } = this.viewOf(tile);
+        return { "--rot": `${rotate}deg`, "--flip": mirror ? -1 : 1 };
       },
 
       isPinned(peerId) {

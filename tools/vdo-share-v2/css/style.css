@@ -335,7 +335,21 @@ button.chip { cursor: pointer; }
 }
 
 .share-group { display: inline-flex; gap: 6px; }
-.tile video.mirror { transform: scaleX(-1); }
+/* Per-tile rotation (--rot) and horizontal mirror (--flip, applied after rotating so it always
+   flips left/right as seen). Sideways (90°/270°) videos swap width and height using the tile's
+   container size, so object-fit: contain still fits the whole picture. */
+.tile { container-type: size; }
+.tile video { transform: scaleX(var(--flip, 1)) rotate(var(--rot, 0deg)); }
+.tile video.sideways {
+  inset: auto;
+  left: 50%;
+  top: 50%;
+  width: 100cqh;
+  height: 100cqw;
+  transform: translate(-50%, -50%) scaleX(var(--flip, 1)) rotate(var(--rot, 0deg));
+}
+.tile-bar button.icon { min-width: 28px; justify-content: center; font-size: 14px; }
+.tile-bar button.icon.active { background: var(--accent); border-color: var(--accent); color: #fff; }
 
 /* Fullscreen screens area: no session bar, black backdrop, exit button in the corner. */
 .grid-area:fullscreen { padding: 8px; background: #000; }

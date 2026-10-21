@@ -101,10 +101,14 @@
                :class="{ 'is-focused': focusedTile === tile.peerId, 'is-me': tile.isMe, 'is-pinned': isPinned(tile.peerId) }"
                :title="focusedTile === tile.peerId ? $t('session.unfocusTitle') : $t('session.focusTitle')"
                @click="toggleFocus(tile.peerId)">
-            <video-view v-if="tile.stream" :stream="tile.stream" :muted="tile.isMe || !unmuted[tile.peerId]" :class="{ mirror: tile.mirror }"></video-view>
+            <video-view v-if="tile.stream" :stream="tile.stream" :muted="tile.isMe || !unmuted[tile.peerId]"
+                        :class="{ sideways: viewOf(tile).rotate % 180 !== 0 }" :style="videoStyle(tile)"></video-view>
             <div v-else class="tile-waiting">{{ $t('session.waitingVideo') }}</div>
             <div class="tile-bar">
               <span class="tile-name">{{ tile.isMe ? $t(ui.shareKind === 'camera' ? 'session.yourCamera' : 'session.yourScreen') : tile.nickname }}</span>
+              <button type="button" class="icon" :title="$t('session.rotate')" :aria-label="$t('session.rotate')" @click.stop="rotate(tile)">⟳</button>
+              <button type="button" class="icon" :class="{ active: viewOf(tile).mirror }" :aria-pressed="viewOf(tile).mirror"
+                      :title="$t('session.mirror')" :aria-label="$t('session.mirror')" @click.stop="toggleMirror(tile)">⇋</button>
               <button type="button" class="pin" :class="{ active: isPinned(tile.peerId) }" :aria-pressed="isPinned(tile.peerId)"
                       :title="$t(isPinned(tile.peerId) ? 'session.unpinTitle' : 'session.pinTitle')" @click.stop="togglePin(tile.peerId)">
                 {{ isPinned(tile.peerId) ? $t('session.unpin') : $t('session.pin') }}
